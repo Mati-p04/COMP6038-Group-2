@@ -13,16 +13,28 @@ Claim **FR6: country outlier detection and visual highlighting**. The design rep
 - marks values strictly below `Q1 - 1.5 × IQR` or above `Q3 + 1.5 × IQR`;
 - highlights each corresponding bar through a `MaterialPropertyBlock`, then restores its previous block when the view is reset or data is replaced.
 
-## Integration contract
+## Unity project integration
 
-1. Add the script to the Unity project.
-2. Add `CountryOutlierHighlighter` to a scene object.
-3. From the chart builder, create an `OutlierBar` for each country using the currently selected metric and that country bar's `Renderer`.
-4. Call `SetBars(...)` after the chart has been built or the height metric has changed.
-5. Call `HighlightOutliers()` for the “find the outliers” action. Use the returned country names for an interpreted-action panel or a short spoken/text response.
-6. Call `ResetHighlight()` when resetting the view. The module also clears its previous highlights when new bars are supplied.
+The repository currently contains the Unity XR project template and development scenes, but no country chart builder or country dataset API. `OutlierDemo.unity` therefore provides a standalone chart adapter using generated sample bars. It demonstrates the full data-to-renderer path without changing the team's other scenes. When the real chart is added, replace the sample list/build loop in `OutlierHighlightDemo` with the chart's active metric and bar `Renderer` references.
 
-The project source and existing chart-builder API were not included, so the adapter call in steps 3–4 must be connected to the team's actual bar/data types during integration.
+For a chart builder, create one `CountryOutlierHighlighter.OutlierBar` per country using the selected metric and that bar's `Renderer`, then call:
+
+```csharp
+highlighter.SetBars(countryBars);             // after build or metric change
+List<string> names = highlighter.HighlightOutliers(); // find action
+highlighter.ResetHighlight();                 // reset action
+```
+
+`SetBars` clears old highlights before replacing the data. `HighlightOutliers` returns the flagged country names for an interpreted-action panel or spoken/text response.
+
+## Run the sample demo
+
+1. Open `Assets/Scenes/OutlierDemo.unity` in Unity 6.3.
+2. Enter Play Mode.
+3. Press **H** or click **Highlight**. `Island (100)` should turn orange-red; the status panel and Console list it as the outlier.
+4. Press **R** or click **Reset**. The bar should return to its original blue color.
+
+The sample values are `1, 2, 3, 4, 5, 6, 7, 8, 100`. The demo creates its bars at runtime and calls `SetBars` with each country name, value, and renderer.
 
 ## Merge-ready claim message
 
